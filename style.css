@@ -1,0 +1,236 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #e9ecef; /* Un fondo gris claro agradable */
+    min-height: 100vh; /* Asegura que el body ocupe al menos toda la altura de la ventana */
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar {
+    z-index: 1030; /* Asegura que la barra de navegación esté sobre todo */
+}
+
+main.container {
+    flex-grow: 1; /* Permite que el contenido principal ocupe el espacio disponible */
+    padding-top: 70px; /* Espacio para el header fijo */
+    padding-bottom: 30px; /* Espacio inferior */
+}
+
+.view {
+    display: none; /* Oculta todas las vistas por defecto */
+    flex-direction: column; /* Para que el contenido se apile verticalmente */
+    align-items: center; /* Centra horizontalmente el contenido de la vista */
+    min-height: calc(100vh - 100px); /* Altura mínima para cada vista, ajusta según tu header/footer */
+    justify-content: center; /* Centra verticalmente el contenido de la vista */
+    width: 100%; /* Asegura que la vista ocupe todo el ancho */
+}
+
+.view.active {
+    display: flex; /* Muestra la vista activa */
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Estilos de las tarjetas de prueba */
+.test-card {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.test-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.test-card .card-body {
+    padding: 1.5rem;
+}
+
+/* Estilos de las cintas */
+.test-ribbon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px; /* Ancho de la base de la cinta */
+    height: 100px; /* Altura de la base de la cinta */
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.test-ribbon::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-width: 50px; /* Ancho y alto de los triángulos */
+    border-style: solid;
+    border-color: transparent; /* Por defecto transparente */
+    transform-origin: top right;
+}
+
+.test-ribbon.ribbon-right::before {
+    border-right-color: var(--ribbon-color, #dc3545); /* Color de la cinta */
+    border-top-color: var(--ribbon-color, #dc3545); /* Color de la cinta */
+}
+
+.test-ribbon.ribbon-red::before {
+    --ribbon-color: #dc3545; /* Rojo para Obligatoria */
+    border-top-color: var(--ribbon-color);
+    border-right-color: var(--ribbon-color);
+}
+
+.test-ribbon.ribbon-blue::before {
+    --ribbon-color: #0d6efd; /* Azul para Electiva */
+    border-top-color: var(--ribbon-color);
+    border-right-color: var(--ribbon-color);
+}
+
+.test-ribbon .ribbon-text {
+    position: absolute;
+    display: block;
+    width: 150px; /* Longitud del texto rotado */
+    padding: 5px 0;
+    background-color: transparent; /* El color ya está en el ::before */
+    color: white;
+    text-align: center;
+    font-size: 0.85em;
+    line-height: 1.2;
+    top: 25px; /* Ajusta para centrar verticalmente */
+    right: -40px; /* Ajusta para centrar horizontalmente */
+    transform: rotate(45deg);
+    transform-origin: 50% 50%;
+    z-index: 1;
+    white-space: nowrap; /* Asegura que el texto no se rompa en varias líneas */
+}
+
+/* Ajustes para el formulario de login/registro */
+#login-view .card, #register-view .card {
+    background: #fff;
+    border: none;
+    border-radius: 12px;
+}
+
+/* Estilos para la vista de prueba */
+.custom-radio .form-check-input:checked {
+    background-color: #0d6efd; /* Color primario de Bootstrap */
+    border-color: #0d6efd;
+}
+
+.custom-radio .form-check-input:checked ~ .form-check-label {
+    color: #0d6efd; /* Color de texto cuando está seleccionado */
+    font-weight: bold;
+}
+
+.options-container .form-check {
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.options-container .form-check:hover {
+    background-color: #f8f9fa;
+    border-color: #0d6efd;
+}
+
+.options-container .form-check-input {
+    margin-right: 10px;
+    float: none; /* Elimina el float por defecto de form-check-input */
+    vertical-align: middle; /* Alinea con el texto */
+}
+
+.options-container .form-check-label {
+    margin-bottom: 0;
+    cursor: pointer;
+    vertical-align: middle; /* Alinea con el input */
+}
+
+/* Estilos para el dashboard del estudiante */
+#user-tests-container .list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+#user-tests-container .list-group-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Estilos para el historial de pruebas */
+#history-list-container .list-group-item {
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+#history-list-container .list-group-item:last-child {
+    margin-bottom: 0;
+}
+
+.result-correct {
+    color: #198754; /* Verde */
+}
+
+.result-incorrect {
+    color: #dc3545; /* Rojo */
+}
+
+.result-unanswered {
+    color: #6c757d; /* Gris */
+}
+
+/* Animación para el botón de inicio de sesión */
+#login-btn, #register-btn {
+    transition: all 0.3s ease;
+}
+
+#login-btn:hover, #register-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para el dashboard del administrador */
+#admin-dashboard-view .card {
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+#admin-dashboard-view .card-text.display-4 {
+    font-size: 3.5rem;
+    font-weight: 600;
+    color: #0d6efd; /* Color primario */
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+    .navbar-brand, #platform-subtitle {
+        font-size: 0.9em;
+    }
+    .test-ribbon {
+        width: 80px;
+        height: 80px;
+    }
+    .test-ribbon::before {
+        border-width: 40px;
+    }
+    .test-ribbon .ribbon-text {
+        width: 120px;
+        top: 20px;
+        right: -30px;
+        font-size: 0.7em;
+    }
+    .view {
+        min-height: calc(100vh - 80px); /* Ajusta para pantallas más pequeñas */
+    }
+}
