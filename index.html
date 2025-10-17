@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INSTITUTO BSHIELD - Plataforma Integral</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#003399">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="bshield-logo.png" alt="Instituto BSHIELD Logo" class="header-logo">
+                <div class="header-titles">
+                    <h1>INSTITUTO BSHIELD</h1>
+                    <p>Plataforma integral gestión ensayos PAES</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <nav class="admin-nav" id="admin-nav-bar" style="display:none;">
+            <button class="admin-nav-btn active" data-view="admin-dashboard-view"><i class="fas fa-chart-line"></i> Dashboard</button>
+            <button class="admin-nav-btn" data-view="admin-users-view"><i class="fas fa-users"></i> Gestión de Usuarios</button>
+            <button class="admin-nav-btn" data-view="admin-modules-view"><i class="fas fa-flask"></i> Módulos de Pruebas</button>
+            <button class="admin-nav-btn" data-view="admin-stats-view"><i class="fas fa-chart-pie"></i> Estadísticas</button>
+            <button class="btn btn-danger ms-auto" id="logout-btn-admin"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+        </nav>
+
+        <div id="view-container">
+            </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
