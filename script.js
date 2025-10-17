@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTestState = { type: null, questions: [], answers: {}, currentIndex: 0, timeRemaining: 0, timerInterval: null };
 
     // --- DATOS DE PREGUNTAS (AHORA INCLUIDOS DIRECTAMENTE EN SCRIPT.JS) ---
-    // Este objeto simula el contenido que estaría en questions.json
+    // ESTA ES LA ÚNICA DECLARACIÓN GLOBAL DE allQuestions.
+    // NO DEBE HABER OTRA DECLARACIÓN 'const allQuestions' EN ESTE ARCHIVO.
     const allQuestions = {
         "lectora": [
             { "question": "¿Cuál es la idea principal de un texto?", "options": ["El título", "La primera oración", "El mensaje central", "Las palabras clave"], "correctOption": 2 },
@@ -47,11 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const testConfig = {
-        lectora: { name: 'Competencia Lectora', type: 'obligatoria', questionsCount: 5, duration: 15 },
-        m1: { name: 'Competencia Matemática 1 (M1)', type: 'obligatoria', questionsCount: 5, duration: 15 },
-        m2: { name: 'Competencia Matemática 2 (M2)', type: 'electiva', questionsCount: 5, duration: 15 },
-        ciencias: { name: 'Ciencias', type: 'electiva', questionsCount: 5, duration: 15 },
-        historia: { name: 'Historia y Cs. Sociales', type: 'electiva', questionsCount: 5, duration: 15 }
+        lectora: { name: 'Competencia Lectora', type: 'obligatoria', questionsCount: allQuestions.lectora.length, duration: 15 },
+        m1: { name: 'Competencia Matemática 1 (M1)', type: 'obligatoria', questionsCount: allQuestions.m1.length, duration: 15 },
+        m2: { name: 'Competencia Matemática 2 (M2)', type: 'electiva', questionsCount: allQuestions.m2.length, duration: 15 },
+        ciencias: { name: 'Ciencias', type: 'electiva', questionsCount: allQuestions.ciencias.length, duration: 15 },
+        historia: { name: 'Historia y Cs. Sociales', type: 'electiva', questionsCount: allQuestions.historia.length, duration: 15 }
     };
 
     // --- INICIALIZACIÓN ---
@@ -84,17 +85,23 @@ document.addEventListener('DOMContentLoaded', () => {
             showView('welcome-view');
         }
 
-        setupEventListeners();
-        renderViewsContainer(); // Renderiza todas las vistas dinámicamente
+        renderViewsContainer(); // Renderiza todas las vistas dinámicamente DENTRO de #view-container
+        setupEventListeners(); // Configura los event listeners DESPUÉS de que las vistas se han renderizado
     }
 
-    // --- Elementos DOM comunes ---
-    const viewContainer = document.getElementById('view-container');
-    const headerTimerDisplay = document.getElementById('fixed-time-display'); // Asumiendo que existe en el HTML de test-view
-    const adminNavBar = document.getElementById('admin-nav-bar');
+    // --- Elementos DOM comunes (definidos después de que renderViewsContainer haya creado el HTML) ---
+    let viewContainer;
+    let headerTimerDisplay;
+    let adminNavBar;
 
     // --- Renderizado Dinámico de Vistas ---
     function renderViewsContainer() {
+        viewContainer = document.getElementById('view-container');
+        if (!viewContainer) {
+            console.error("El elemento #view-container no fue encontrado. Asegúrate de que existe en index.html.");
+            return;
+        }
+
         viewContainer.innerHTML = `
             <section id="welcome-view" class="view active">
                 <div class="card">
@@ -218,104 +225,39 @@ document.addEventListener('DOMContentLoaded', () => {
             </section>
 
             <section id="admin-users-view" class="view">
-                <div class="card p-4">
-                    <h3 class="mb-4">Gestión de Usuarios</h3>
-                    <button class="btn btn-success mb-3" id="add-user-btn"><i class="fas fa-plus-circle"></i> Añadir Nuevo Usuario</button>
-                    <div class="card p-3 mb-3 hidden" id="add-user-form-card">
-                        <h5>Añadir Usuario</h5>
-                        <form id="add-user-form">
-                            <div class="mb-3">
-                                <label for="new-username" class="form-label">Usuario</label>
-                                <input type="text" class="form-control" id="new-username" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="new-password" class="form-label">Contraseña</label>
-                                <input type="password" class="form-control" id="new-password" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="new-role" class="form-label">Rol</label>
-                                <select class="form-control" id="new-role">
-                                    <option value="student">Estudiante</option>
-                                    <option value="admin">Administrador</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-primary me-2"><i class="fas fa-save"></i> Guardar Usuario</button>
-                            <button type="button" class="btn btn-secondary" id="cancel-add-user-btn"><i class="fas fa-times"></i> Cancelar</button>
-                        </form>
-                    </div>
-                    <div class="list-group" id="users-list-container"></div>
-                </div>
-            </section>
+                </section>
 
             <section id="admin-modules-view" class="view">
-                <div class="card p-4">
-                    <h3 class="mb-4">Gestión de Módulos de Pruebas</h3>
-                    <button class="btn btn-success mb-3" id="add-module-btn"><i class="fas fa-plus-circle"></i> Añadir Nuevo Módulo</button>
-                    <div class="card p-3 mb-3 hidden" id="add-module-form-card">
-                        <h5>Añadir Módulo</h5>
-                        <form id="add-module-form">
-                            <div class="mb-3">
-                                <label for="new-module-id" class="form-label">ID del Módulo (ej: m3)</label>
-                                <input type="text" class="form-control" id="new-module-id" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="new-module-name" class="form-label">Nombre del Módulo</label>
-                                <input type="text" class="form-control" id="new-module-name" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="new-module-type" class="form-label">Tipo</label>
-                                <select class="form-control" id="new-module-type">
-                                    <option value="obligatoria">Obligatoria</option>
-                                    <option value="electiva">Electiva</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="new-module-questions" class="form-label">Cantidad de Preguntas</label>
-                                <input type="number" class="form-control" id="new-module-questions" required min="1" value="5">
-                            </div>
-                            <div class="mb-3">
-                                <label for="new-module-duration" class="form-label">Duración (minutos)</label>
-                                <input type="number" class="form-control" id="new-module-duration" required min="1" value="15">
-                            </div>
-                            <button type="submit" class="btn btn-primary me-2"><i class="fas fa-save"></i> Guardar Módulo</button>
-                            <button type="button" class="btn btn-secondary" id="cancel-add-module-btn"><i class="fas fa-times"></i> Cancelar</button>
-                        </form>
-                    </div>
-                    <div class="list-group" id="modules-list-container"></div>
-                    <p class="text-muted mt-3">Nota: Para añadir o editar las preguntas de un módulo, debes modificar el objeto `allQuestions` directamente en `script.js`.</p>
-                </div>
-            </section>
+                </section>
 
             <section id="admin-stats-view" class="view">
-                <div class="card p-4">
-                    <h3 class="mb-4">Estadísticas Generales</h3>
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <h4>Puntajes Promedio por Módulo</h4>
-                            <div id="avg-scores-container"></div>
-                        </div>
-                        <div class="col-md-6 mb-4">
-                            <h4>Intentos de Prueba por Módulo</h4>
-                            <div id="attempts-per-module-container"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                </section>
         `;
+        // Una vez que el HTML dinámico ha sido inyectado, obtenemos las referencias a los elementos
+        headerTimerDisplay = document.getElementById('fixed-time-display');
+        adminNavBar = document.getElementById('admin-nav-bar');
     }
 
 
     // --- EVENT LISTENERS ---
     function setupEventListeners() {
+        // Event listeners globales (para botones que siempre existen o son renderizados una vez con renderViewsContainer)
         document.getElementById('show-login-btn').addEventListener('click', () => showView('login-view'));
         document.getElementById('show-inscription-btn').addEventListener('click', () => showView('inscription-view'));
         document.getElementById('back-to-welcome-from-login').addEventListener('click', () => showView('welcome-view'));
         document.getElementById('back-to-welcome-from-inscription').addEventListener('click', () => showView('welcome-view'));
         document.getElementById('login-form').addEventListener('submit', handleLogin);
-        document.getElementById('logout-btn-student').addEventListener('click', logout);
-        document.getElementById('logout-btn-admin').addEventListener('click', logout);
+        
+        // El botón de logout de estudiante ahora está dentro de la vista dinámica
+        const logoutBtnStudent = document.getElementById('logout-btn-student');
+        if (logoutBtnStudent) logoutBtnStudent.addEventListener('click', logout);
 
-        // Test navigation buttons
+        // Los botones de la admin nav bar están fuera del view-container pero su evento se re-setea
+        // para manejar el logout de admin y la navegación a vistas admin
+        const logoutBtnAdmin = document.getElementById('logout-btn-admin');
+        if (logoutBtnAdmin) logoutBtnAdmin.addEventListener('click', logout);
+
+        // Test navigation buttons (asegurarse de que existan)
         const nextBtn = document.getElementById('next-btn');
         const prevBtn = document.getElementById('prev-btn');
         const finishTestBtn = document.getElementById('finish-test-btn');
@@ -331,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (userTestsContainer) {
             userTestsContainer.addEventListener('click', (e) => {
                 if (e.target.classList.contains('start-test-btn')) {
-                    startTest(e.target.dataset.testType);
+                    startTest(e.target.dataset.testType, e.target.dataset.resume === 'true');
                 }
             });
         }
@@ -342,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const historyModalCloseBtn = document.getElementById('history-modal-close-btn');
         if (historyModalCloseBtn) historyModalCloseBtn.addEventListener('click', () => document.getElementById('history-modal-overlay').classList.remove('active'));
 
-        // Admin Navigation buttons
+        // Admin Navigation buttons (en el header principal)
         document.querySelectorAll('.admin-nav-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 document.querySelectorAll('.admin-nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -350,24 +292,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const viewToShow = e.currentTarget.dataset.view;
                 showView(viewToShow);
-                if (viewToShow === 'admin-dashboard-view') updateAdminStats();
-                if (viewToShow === 'admin-users-view') renderAdminUsersView(); // Llama a la función de renderizado para usuarios
-                if (viewToShow === 'admin-modules-view') renderAdminModulesView(); // Llama a la función de renderizado para módulos
-                if (viewToShow === 'admin-stats-view') renderAdminStatsView(); // Llama a la función de renderizado para estadísticas
+                // Llamadas a renderizado específicas para cada vista de admin
+                if (viewToShow === 'admin-dashboard-view') updateAdminStats(); // Sólo actualiza stats
+                if (viewToShow === 'admin-users-view') renderAdminUsersView();
+                if (viewToShow === 'admin-modules-view') renderAdminModulesView();
+                if (viewToShow === 'admin-stats-view') renderAdminStatsView();
             });
         });
-
-        // Event listeners para la gestión de usuarios en admin-users-view (dinámicos, requieren la vista renderizada)
-        // Se configuran dentro de renderAdminUsersView para asegurar que los elementos existan.
     }
 
     // --- LÓGICA DE NAVEGACIÓN ---
     function showView(viewId) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(viewId).classList.add('active');
+        const targetView = document.getElementById(viewId);
+        if (targetView) {
+            targetView.classList.add('active');
+        } else {
+            console.error(`Vista con ID '${viewId}' no encontrada.`);
+            return;
+        }
+
         // Mostrar/ocultar barra de admin
-        if (adminNavBar) { // Asegurarse de que adminNavBar existe
-            adminNavBar.style.display = (currentUser && currentUser.role === 'admin' && viewId.startsWith('admin-')) ? 'flex' : 'none';
+        if (adminNavBar) {
+            // Asegurarse de que el usuario es admin y la vista actual es una vista de admin
+            const isAdminView = viewId.startsWith('admin-');
+            adminNavBar.style.display = (currentUser && currentUser.role === 'admin' && isAdminView) ? 'flex' : 'none';
         }
         window.scrollTo(0, 0); // Scroll to top when changing view
     }
@@ -397,15 +346,18 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('currentUser');
         stopTimer();
         currentTestState = { type: null, questions: [], answers: {}, currentIndex: 0, timeRemaining: 0, timerInterval: null };
-        if (adminNavBar) adminNavBar.style.display = 'none'; // Asegurarse de que adminNavBar existe
+        if (adminNavBar) adminNavBar.style.display = 'none';
         showView('welcome-view');
+        // Re-renderizar las vistas para limpiar cualquier estado de usuario previo
+        renderViewsContainer();
+        setupEventListeners(); // Re-configurar listeners para los elementos recién creados
     }
 
     // --- DASHBOARDS ---
     function showAdminDashboard() {
         showView('admin-dashboard-view');
         updateAdminStats();
-        // Asegurarse de que el botón de dashboard esté activo
+        // Asegurarse de que el botón de dashboard esté activo en la nav bar
         const dashboardBtn = document.querySelector('.admin-nav-btn[data-view="admin-dashboard-view"]');
         if (dashboardBtn) {
             document.querySelectorAll('.admin-nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -422,7 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderStudentTests() {
         const container = document.getElementById('user-tests-container');
-        if (!container) return; // Salir si el contenedor no existe
+        if (!container) return;
         container.innerHTML = '';
         Object.keys(testConfig).forEach(testKey => {
             const config = testConfig[testKey];
@@ -442,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const card = document.createElement('div');
-            card.className = 'list-item'; // Usamos list-item para el estilo
+            card.className = 'list-item';
             card.innerHTML = `
                 <div>
                     <h5>${config.name} ${statusBadge}</h5>
@@ -456,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderStudentProgress() {
         const container = document.getElementById('user-progress-container');
-        if (!container) return; // Salir si el contenedor no existe
+        if (!container) return;
         container.innerHTML = '';
 
         if (currentUser.history.length === 0) {
@@ -557,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LÓGICA DE PRUEBA ---
     function startTest(testType, resume = false) {
         const config = testConfig[testType];
-        if (!config || !allQuestions[testType]) {
+        if (!config || !allQuestions[testType] || allQuestions[testType].length === 0) {
             alert('Prueba no encontrada o sin preguntas.');
             showStudentDashboard();
             return;
@@ -629,7 +581,8 @@ document.addEventListener('DOMContentLoaded', () => {
         prevBtn.disabled = currentTestState.currentIndex === 0;
         nextBtn.classList.toggle('hidden', currentTestState.currentIndex === currentTestState.questions.length - 1);
         finishTestBtn.classList.toggle('hidden', currentTestState.currentIndex !== currentTestState.questions.length - 1);
-        finishAttemptBtn.classList.toggle('hidden', currentTestState.currentIndex === currentTestState.questions.length - 1); // Siempre visible excepto en la última
+        // finishAttemptBtn siempre visible excepto en la última pregunta para que el usuario pueda salir
+        finishAttemptBtn.classList.toggle('hidden', currentTestState.currentIndex === currentTestState.questions.length - 1);
         
         // Listener para guardar la respuesta al cambiar de opción
         document.querySelectorAll(`input[name="question-${currentTestState.currentIndex}"]`).forEach(input => {
@@ -778,9 +731,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Admin Views Render Functions ---
+    // Estas funciones ahora se encargan de rellenar el contenido de las secciones de admin
+    // que están definidas en renderViewsContainer como <section id="admin-users-view" class="view"></section>
     function renderAdminUsersView() {
         const adminUsersView = document.getElementById('admin-users-view');
-        if (!adminUsersView) return; // Asegurar que la vista exista
+        if (!adminUsersView) return;
         adminUsersView.innerHTML = `
             <div class="card p-4">
                 <h3 class="mb-4">Gestión de Usuarios</h3>
@@ -810,7 +765,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="list-group" id="users-list-container"></div>
             </div>
         `;
-        // Configurar event listeners después de renderizar la vista
+        // Configurar event listeners DESPUÉS de renderizar la vista
         document.getElementById('add-user-btn').addEventListener('click', () => {
             document.getElementById('add-user-form-card').classList.remove('hidden');
         });
@@ -837,7 +792,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateAdminStats();
             alert('Usuario añadido con éxito.');
         });
-        renderUsersList();
+        renderUsersList(); // Llamar para mostrar la lista inicial de usuarios
     }
 
     function renderUsersList() {
@@ -942,18 +897,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             // Añadir al testConfig
             testConfig[id] = { name, type, questionsCount, duration };
-            allQuestions[id] = []; // Inicializar array de preguntas vacío para el nuevo módulo
+            allQuestions[id] = []; // Inicializar array de preguntas vacío para el nuevo módulo (si se necesita persistencia, guardar en localStorage)
 
-            // No hay necesidad de guardar allTests o allQuestions en localStorage si están hardcodeados.
-            // Si quieres que los cambios persistan en sesiones, deberíamos adaptar allTests para ser una variable que se guarde.
-            // Por ahora, solo se guarda en la sesión actual.
             alert('Módulo añadido con éxito (temporalmente). Reinicia para perderlo si no lo añades a script.js.');
             document.getElementById('add-module-form').reset();
             document.getElementById('add-module-form-card').classList.add('hidden');
             renderModulesList();
             updateAdminStats();
         });
-        renderModulesList();
+        renderModulesList(); // Llamar para mostrar la lista inicial de módulos
     }
 
     function renderModulesList() {
@@ -1016,7 +968,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
         `;
-        updateAdminStatsContainers();
+        updateAdminStatsContainers(); // Llama a la función para llenar los contenedores de estadísticas
     }
 
     function updateAdminStats() {
